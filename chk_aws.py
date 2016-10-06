@@ -17,6 +17,7 @@ from sys import getsizeof
 import cPickle as pickle
 import h5py
 import re
+import os
 
 if os.path.abspath(__file__)=='/home/keeda/Documents/scientist/demo/apparel_tagging/chk_aws.py':
     project_root = '/home/keeda/Documents/scientist/demo/apparel_tagging/'
@@ -51,7 +52,7 @@ with h5py.File('feature_indices.h5', 'w') as hf:
 model = ResNet50(weights= 'imagenet', include_top =False)
 
 #create feature files
-for ind,i,j in enumerate(features_indices):
+for ind,(i,j) in enumerate(features_indices):
     
 
     #prep first image

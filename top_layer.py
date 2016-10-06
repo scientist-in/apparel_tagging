@@ -12,13 +12,13 @@ import os
 import re
 import ipdb
 
-ipdb.set_trace()
+
 if os.path.abspath(__file__)=='/home/keeda/Documents/scientist/demo/apparel_tagging/top_layer.py':
     project_root = '/home/keeda/Documents/scientist/demo/apparel_tagging/'
 else:
     project_root = '/home/ubuntu/apparel_tagging/'
 
-training_batch_size = 10
+training_batch_size = 100
 nb_epoch = 10
 #image_label_file
 image_label_file =project_root+'fashion-data/train.txt'
@@ -38,34 +38,40 @@ labelEncoded = le.transform(labels)
 labels_one_hot = np_utils.to_categorical(labelEncoded,nb_classes)
 
 #order feature files in as per labels
-features_folder = project_root+'features/'
-feature_files = [features_folder+i for i in os.listdir(features_folder)]
-p = re.compile('features(\d{1,2}?)-')
-file_nos = [int(p.findall(filename)[0]) for filename in feature_files]
-files_ordered = zip(feature_files,file_nos)
-files_ordered.sort(key = lambda t:t[1])
-feature_files = [i[1] for i in files_ordered]
+# features_folder = project_root+'features/'
+# feature_files = [features_folder+i for i in os.listdir(features_folder)]
+# p = re.compile('features(\d+)-')
+# file_nos = [int(p.findall(filename)[0]) for filename in feature_files]
+# files_ordered = zip(feature_files,file_nos)
+# files_ordered.sort(key = lambda t:t[1])
+# feature_files = [i[0] for i in files_ordered]
 
 
 #get features in loop and train
-for idx, feature_file in enumerate(feature_files):
-    with h5py.File(feature_files,'r') as hf:
-        data = hf.get('features_h5')
-        np_data_temp = np.array(data)
-    print('Shape of the array features: \n', np_data_temp.shape)
-    if not idx==0:
-        np_data = np.append(np_data,np_data_temp,axis = 0)
-    else:
-        np_data = np_data_temp
+# for idx, feature_file in enumerate(feature_files):
+#     with h5py.File(feature_file,'r') as hf:
+#         data = hf.get('features_h5')
+#         np_data_temp = np.array(data)
+#     print('Shape of the array features: \n', np_data_temp.shape)
+#     if not idx==0:
+#         np_data = np.append(np_data,np_data_temp,axis = 0)
+#     else:
+#         np_data = np_data_temp
 
+with h5py.File(project_root+'all_features.h5','r') as hf:
+        data = hf.get('all_features')
+        np_data = np.array(data)
+#ipdb.set_trace()
     #define top layer
 model = Sequential()
 #input shape as per features
 model.add(Flatten(input_shape = np_data.shape[1:4]))
+model.add(Dense(1000,activation='relu'))
+model.add(Dense(1000,activation='relu'))
 model.add(Dense(nb_classes,activation='softmax'))
 
 sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
-model.compile(optimizer=sgd,
+model.compile(optimizer='rmsprop',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 if os.path.isfile('weights.h5'):
@@ -77,7 +83,7 @@ model.fit(x=np_data,y=labels_one_hot,nb_epoch=nb_epoch,batch_size=training_batch
 #model.predict(np_data,batch_size=10)
 
 #save_weights
-model.save_weights('weights.h5')
+#model.save_weights('weights.h5')
     
     
     
